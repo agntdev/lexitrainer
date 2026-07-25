@@ -7,7 +7,7 @@
           {
             "method": "sendMessage",
             "payload": {
-              "text": "Add new card via structured flow"
+              "text": "What word or phrase would you like to learn?"
             }
           }
         ],
@@ -15,6 +15,26 @@
           "text": "/add"
         }
       }
+    ]
+  }
+  ,
+  {
+    "name": "a learner adds a card and resumes a saved session",
+    "steps": [
+      { "send": { "text": "/start" }, "expect": [{ "method": "sendMessage", "payload": { "text": "👋 Welcome! Tap a button below to get started." } }] },
+      { "send": { "callback": "onboard:language:English" }, "expect": [{ "method": "editMessageText", "payload": { "text": "How many new cards feels right each day?" } }] },
+      { "send": { "callback": "onboard:limit:10" }, "expect": [{ "method": "editMessageText", "payload": { "text": "When should I remind you to review? Times use your current UTC timezone." } }] },
+      { "send": { "callback": "onboard:reminder:off" }, "expect": [{ "method": "editMessageText", "payload": { "text": "You’re all set. Small, steady reviews add up." } }] },
+      { "send": { "text": "/add" }, "expect": [{ "method": "sendMessage", "payload": { "text": "What word or phrase would you like to learn?" } }] },
+      { "send": { "text": "bonjour" }, "expect": [{ "method": "sendMessage", "payload": { "text": "What does it mean?" } }] },
+      { "send": { "text": "hello" }, "expect": [{ "method": "sendMessage", "payload": { "text": "Add an example sentence, or tap Skip." } }] },
+      { "send": { "callback": "card:skip-example" }, "expect": [{ "method": "sendMessage", "payload": { "text": "Which deck should hold this card?" } }] },
+      { "send": { "callback": "card:save:1" }, "expect": [{ "method": "sendMessage", "payload": { "text": "Saved “bonjour”. It’ll be ready in your next session." } }] },
+      { "send": { "callback": "session:start" }, "expect": [{ "method": "editMessageText", "payload": { "text": "New card · 1 of 1\n\nbonjour\n\nThink of the meaning, then reveal it." } }] },
+      { "send": { "callback": "menu:main" }, "expect": [{ "method": "editMessageText", "payload": { "text": "👋 Welcome! Tap a button below to get started." } }] },
+      { "send": { "callback": "session:resume" }, "expect": [{ "method": "editMessageText", "payload": { "text": "New card · 1 of 1\n\nbonjour\n\nThink of the meaning, then reveal it." } }] },
+      { "send": { "callback": "session:reveal" }, "expect": [{ "method": "editMessageText", "payload": { "text": "bonjour\n\nhello\n\nHow well did you remember it?" } }] },
+      { "send": { "callback": "rate:4" }, "expect": [{ "method": "editMessageText", "payload": { "text": "You’ve finished this session. Nice work showing up." } }] }
     ]
   }
 ]

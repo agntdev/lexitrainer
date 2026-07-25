@@ -1,0 +1,9 @@
+[
+  {
+    "name": "settings lets a learner set a timezone",
+    "steps": [
+      { "send": { "callback": "settings:timezone" }, "expect": [{ "method": "editMessageText", "payload": { "text": "Send your IANA timezone, like Europe/Paris or America/New_York." } }] },
+      { "send": { "text": "Europe/Paris" }, "expect": [{ "method": "sendMessage", "payload": { "text": "Timezone set to Europe/Paris. Your reminders will follow local time." } }] }
+    ]
+  }
+]

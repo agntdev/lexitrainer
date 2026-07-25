@@ -1,0 +1,8 @@
+[
+  {
+    "name": "progress starts with a clear empty dashboard",
+    "steps": [
+      { "send": { "callback": "stats:show" }, "expect": [{ "method": "editMessageText", "payload": { "text": "You’ve learned 0 words.\n\nYour streak: 0 days\nDue now: 0\nRetention: 0%" } }] }
+    ]
+  }
+]

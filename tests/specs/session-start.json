@@ -5,9 +5,9 @@
       {
         "expect": [
           {
-            "method": "sendMessage",
+            "method": "editMessageText",
             "payload": {
-              "text": "Begin learning new cards up to daily limit"
+              "text": "Your deck is waiting for its first card — add one and come back."
             }
           }
         ],

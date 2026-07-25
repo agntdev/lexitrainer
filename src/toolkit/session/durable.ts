@@ -49,6 +49,10 @@ interface Reminder {
   at: number; // epoch ms
   chatId: number | string;
   text: string;
+  /** Daily reminders are re-queued after a successful delivery. */
+  repeatEveryMs?: number;
+  replace?: boolean;
+  clear?: boolean;
 }
 
 /**
@@ -93,16 +97,26 @@ export async function remindAt(
   chatId: number | string,
   whenEpochMs: number,
   text: string,
+  repeatEveryMs?: number,
 ): Promise<void> {
   try {
     const stub = env.CHAT_DO.get(env.CHAT_DO.idFromName("chat:" + chatId));
     await stub.fetch("https://do/remind", {
       method: "POST",
-      body: JSON.stringify({ at: whenEpochMs, chatId, text } satisfies Reminder),
+      body: JSON.stringify({ at: whenEpochMs, chatId, text, repeatEveryMs, replace: true } satisfies Reminder),
     });
   } catch {
     /* best-effort: a reminder we couldn't schedule must not break the reply */
   }
+}
+
+/** Remove a chat's scheduled notifications, used when a learner turns daily
+ * reminders off. The same endpoint is harmless when no reminder exists. */
+export async function clearReminders(env: WorkerEnv, chatId: number | string): Promise<void> {
+  try {
+    const stub = env.CHAT_DO.get(env.CHAT_DO.idFromName("chat:" + chatId));
+    await stub.fetch("https://do/remind", { method: "POST", body: JSON.stringify({ at: 0, chatId, text: "", clear: true } satisfies Reminder) });
+  } catch { /* best-effort */ }
 }
 
 async function tg(token: string, method: string, payload: unknown): Promise<void> {
@@ -147,7 +161,12 @@ export class ChatDO {
     // Schedule a reminder + (re)arm the alarm to the earliest due one.
     if (url.pathname === "/remind" && request.method === "POST") {
       const rem = (await request.json()) as Reminder;
-      const list = (await this.state.storage.get<Reminder[]>("reminders")) ?? [];
+      if (rem.clear) {
+        await this.state.storage.put("reminders", []);
+        return new Response(null, { status: 204 });
+      }
+      const previous = (await this.state.storage.get<Reminder[]>("reminders")) ?? [];
+      const list = rem.replace ? [] : previous;
       list.push(rem);
       await this.state.storage.put("reminders", list);
       await this.rearm(list);
@@ -166,6 +185,12 @@ export class ChatDO {
     const rest = list.filter((r) => r.at > now);
     for (const r of due) {
       await tg(this.env.BOT_TOKEN, "sendMessage", { chat_id: r.chatId, text: r.text });
+      if (r.repeatEveryMs && r.repeatEveryMs > 0) {
+        // Advance from the planned delivery (rather than from "now") so a
+        // late alarm never slowly drifts the learner's reminder time.
+        const elapsed = Math.max(0, now - r.at);
+        rest.push({ ...r, at: r.at + (Math.floor(elapsed / r.repeatEveryMs) + 1) * r.repeatEveryMs });
+      }
     }
     await this.state.storage.put("reminders", rest);
     await this.rearm(rest);

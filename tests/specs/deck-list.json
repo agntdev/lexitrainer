@@ -5,9 +5,9 @@
       {
         "expect": [
           {
-            "method": "sendMessage",
+            "method": "editMessageText",
             "payload": {
-              "text": "List and manage personal decks"
+              "text": "No decks yet — tap ➕ New deck to make your first one."
             }
           }
         ],
