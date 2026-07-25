@@ -1,0 +1,20 @@
+[
+  {
+    "name": "New Session",
+    "steps": [
+      {
+        "expect": [
+          {
+            "method": "sendMessage",
+            "payload": {
+              "text": "Begin learning new cards up to daily limit"
+            }
+          }
+        ],
+        "send": {
+          "callback": "session:start"
+        }
+      }
+    ]
+  }
+]
