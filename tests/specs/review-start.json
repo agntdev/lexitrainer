@@ -5,9 +5,9 @@
       {
         "expect": [
           {
-            "method": "sendMessage",
+            "method": "editMessageText",
             "payload": {
-              "text": "Start review session for scheduled cards"
+              "text": "Nothing is due right now — you’re nicely caught up."
             }
           }
         ],

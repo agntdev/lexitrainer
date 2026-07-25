@@ -8,9 +8,9 @@ async function main() {
     process.exit(1);
   }
   const bot = await buildBot(token);
-  // Publish the "/" command list to Telegram (discoverability). A button-first
-  // bot exposes only /start + /help; everything else is reached via menu buttons.
-  await setDefaultCommands(bot);
+  // `/add` is the one intentional typed shortcut: learners often remember a
+  // word away from the menu and can immediately start the structured flow.
+  await setDefaultCommands(bot, [{ command: "add", description: "Add a vocabulary card" }]);
   bot.start();
 }
 
